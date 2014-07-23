@@ -1,25 +1,10 @@
 #![crate_type = "lib"]
-//#![crate_type = "rlib"]
-//#![crate_type = "dylib"]
-#![crate_id = "github.com/KevinKelley/nanovg-rs#nanovg:0.1"]
-#![comment = "Binding for NanoVG vector-graphics library"]
-#![doc(html_root_url = "https://github.com/KevinKelley/nanovg-rs")]
 
-#![feature(unsafe_destructor)]  // use Option instead
 #![feature(globs)]
-#![allow(non_camel_case_types)]
 #![allow(non_snake_case_functions)]
-#![warn(uppercase_variables)]
-#![deny(unnecessary_parens)]
-#![allow(non_uppercase_statics)]
-#![deny(unnecessary_qualification)]
 //#![warn(missing_doc)]
-#![deny(unused_result)]
 #![allow(unused_imports)]
-#![allow(unused_attribute)]
 #![allow(unused_variable)]
-#![deny(unnecessary_typecast)]
-#![warn(visible_private_types)]
 #![allow(dead_code)]
 
 
@@ -34,6 +19,7 @@ pub use constants::*;
 pub use theme::ThemedContext;
 pub use theme::*;
 
+pub use ICONID = ffi::BND_ICONID;
 
 mod ffi;
 pub mod constants;

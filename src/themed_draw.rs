@@ -1,8 +1,8 @@
 
+use nanovg::Color;
 use super::constants::*;
 use super::*;
 use super::lowlevel_draw::LowLevelDraw;
-use nanovg::Color;
 
 
 pub trait ThemedDraw

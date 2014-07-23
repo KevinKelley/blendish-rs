@@ -61,33 +61,43 @@ pub struct Theme
 }
 
 
+pub trait Themed<'a> {
+    fn theme(&'a self) -> &'a Theme;
+    fn icon_images_handle(&'a self) -> i32;
+    fn font_handle(&'a self) -> i32;
+}
 ////////////////////////////////////////////////////////////////////////////////
 /// extends a nanovg context with theming
 
 pub struct ThemedContext<'a>
 {
-    pub theme: Theme,
+    theme: Theme,
 
     nvg: Ctx,
 
-    pub bnd_icon_image: i32, // handle, icon image spritesheet
-    pub bnd_font: i32,       // handle
+    icon_image: i32, // handle, icon image spritesheet
+    font: i32,       // handle
 }
 
 impl<'a> ThemedContext<'a> {
-    pub fn new(nvg: Ctx) -> ThemedContext<'a> {
+    pub fn wrap(nvg: Ctx) -> ThemedContext<'a> {
         ThemedContext {
             nvg: nvg,
             theme: initial_theme(),
-            bnd_icon_image: -1,
-            bnd_font: -1
+            icon_image: -1,
+            font: -1
         }
     }
 
     pub fn nvg(&mut self) -> &mut Ctx { &mut self.nvg }
 
     pub fn theme(&self) -> &Theme { &self.theme }
+}
 
+impl<'a> Themed<'a> for ThemedContext<'a> {
+    fn theme(&'a self) -> &'a Theme { self.theme() }
+    fn icon_images_handle(&self) -> i32 { self.icon_image }
+    fn font_handle(&self) -> i32 { self.font }
 }
 
 //pub fn bndSetTheme(theme: Theme) {

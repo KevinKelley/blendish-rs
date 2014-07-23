@@ -4,10 +4,10 @@ extern crate graphics;
 extern crate piston;
 // extern crate sdl2_game_window;
 extern crate glfw_game_window;
+//extern crate glfw;
 
 extern crate nanovg;
 extern crate blendish;
-
 
 use piston::{
     Game, GameIteratorSettings, GameWindowSettings,
@@ -25,7 +25,7 @@ use blendish::*;
 use blendish::lowlevel_draw::LowLevelDraw;
 use blendish::themed_draw::ThemedDraw;
 
-
+mod draw;
 mod eyes;
 
 pub struct App<'a> {
@@ -41,7 +41,7 @@ impl<'a> App<'a> {
             demodata: None,
             mouse: (0,0),
             elapsed_time: 0.0,         // time sinze app start
-            theme: ThemedContext::new(
+            theme: ThemedContext::wrap(
                 Ctx::create_gL3(ANTIALIAS|STENCIL_STROKES))
         }
     }
@@ -49,6 +49,7 @@ impl<'a> App<'a> {
 }
 
 
+fn rgb(r:u8, g:u8, b:u8) -> Color { Color::rgb(r,g,b) }
 fn rgba(r:u8, g:u8, b:u8, a:u8) -> Color { Color::rgba(r,g,b, a) }
 
 fn draw_bg(vg: &mut Ctx, x:f32,y:f32,w:f32,h:f32) {
@@ -82,15 +83,16 @@ impl<'a> Game for App<'a> {
         self.nvg().begin_frame(w as i32, h as i32, pxRatio);
 
         draw_bg(self.nvg(), 0.0,0.0, w,h);
-        eyes::draw_eyes(self.nvg(),
-        	60.0, 60.0, 200.0, 120.0,
-        	mx as f32,my as f32,
-        	dt
-        );
-        self.theme.draw_tooltip_background(0.0, 0.0, w,h);
-        self.theme.draw_label(0.0, 0.0, 200.0, 32.0,  -1, "Here's lookin at ya!");
+        draw::draw(&mut self.theme, w,h, rgb(0,0,0));
+//        eyes::draw_eyes(self.nvg(),
+//        	60.0, 60.0, 200.0, 120.0,
+//        	mx as f32,my as f32,
+//        	dt
+//        );
+        //self.theme.draw_tooltip_background(0.0, 0.0, w,h);
+        //self.theme.draw_label(0.0, 0.0, 200.0, 32.0,  -1, "Here's lookin at ya!");
 
-        self.nvg().draw_background(0.0, 0.0, w,h, rgba(242,142,242,255));
+        //self.nvg().draw_background(0.0, 0.0, w,h, rgb(242,142,242));
 
         self.nvg().end_frame();
     }
@@ -144,7 +146,7 @@ fn main() {
     let mut window = Window::new(
         GameWindowSettings {
             title: "Eyes Have It".to_string(),
-            size: [300, 240],
+            size: [800,600],
             fullscreen: false,
             exit_on_esc: true,
         }

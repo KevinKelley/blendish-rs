@@ -1,6 +1,12 @@
 
 use nanovg::{ Ctx, Color, BUTT,MITER };
-use super::*;
+use super::{
+    TextAlignment,
+    min,max,
+    rgba_f,offset_color,transparent,
+    BEVEL_SHADE,INSET_BEVEL_SHADE
+};
+
 
 //////////////////////////////////////////////////////
 // NanoVG context extenders (self must be nanovg::Ctx)
@@ -18,17 +24,17 @@ pub trait LowLevelDraw
 
     // context related
 
-    fn draw_rounded_box(&mut self, x:f32,y:f32, w:f32,h:f32, cr0: f32, cr1: f32, cr2: f32, cr3: f32);
-    fn draw_background(&mut self, x:f32,y:f32, w:f32,h:f32, bg: Color);
-    fn draw_bevel(&mut self, x:f32,y:f32, w:f32,h:f32, bg: Color);
-    fn draw_bevel_inset(&mut self, x:f32,y:f32, w:f32,h:f32, cr2: f32, cr3: f32, bg: Color);
-    fn draw_drop_shadow(&mut self, x:f32,y:f32, w:f32,h:f32, r: f32, feather: f32, alpha: f32);
-    fn draw_inner_box(&mut self, x:f32,y:f32, w:f32,h:f32, cr0: f32, cr1: f32, cr2: f32, cr3: f32, shade_top: Color, shade_down: Color);
-    fn draw_outline_box(&mut self, x:f32,y:f32, w:f32,h:f32, cr0: f32, cr1: f32, cr2: f32, cr3: f32, color: Color);
-    fn draw_check(&mut self, ox: f32, oy: f32, color: Color);
-    fn draw_arrow(&mut self, x: f32, y: f32, s: f32, color: Color);
-    fn draw_up_down_arrow(&mut self, x: f32, y: f32, s: f32, color: Color);
-    fn draw_icon(&mut self, x: f32, y: f32, iconid: i32);
+    fn draw_rounded_box  (&mut self, x:f32, y:f32, w:f32,h:f32, cr0:f32,cr1:f32,cr2:f32,cr3:f32);
+    fn draw_background   (&mut self, x:f32, y:f32, w:f32,h:f32, bg: Color);
+    fn draw_bevel        (&mut self, x:f32, y:f32, w:f32,h:f32, bg: Color);
+    fn draw_bevel_inset  (&mut self, x:f32, y:f32, w:f32,h:f32, cr2:f32,cr3:f32, bg: Color);
+    fn draw_drop_shadow  (&mut self, x:f32, y:f32, w:f32,h:f32, r: f32, feather: f32, alpha: f32);
+    fn draw_inner_box    (&mut self, x:f32, y:f32, w:f32,h:f32, cr0:f32,cr1:f32,cr2:f32,cr3:f32, shade_top: Color, shade_down: Color);
+    fn draw_outline_box  (&mut self, x:f32, y:f32, w:f32,h:f32, cr0:f32,cr1:f32,cr2:f32,cr3:f32, color: Color);
+    fn draw_check        (&mut self,ox:f32,oy:f32, color: Color);
+    fn draw_arrow        (&mut self, x:f32, y:f32, s: f32, color: Color);
+    fn draw_up_down_arrow(&mut self, x:f32, y:f32, s: f32, color: Color);
+    fn draw_icon         (&mut self, x:f32, y:f32, iconid: i32);
     fn draw_icon_label_value(&mut self, x:f32,y:f32, w:f32,h:f32, iconid: i32, color: Color, align: TextAlignment, fontsize: f32, label: &str, value: Option<&str>);
     fn draw_icon_label_caret(&mut self, x:f32,y:f32, w:f32,h:f32, iconid: i32, color: Color, fontsize: f32, label: &str, caretcolor: Color, cbegin: i32, cend: i32);
 }
@@ -56,8 +62,8 @@ impl LowLevelDraw for Ctx {
 
     // Draw a flat panel without any decorations at position (x, y) with size (w, h)
     // and fills it with backgroundColor
-    fn draw_background(&mut self, x:f32,y:f32, w:f32,h:f32, bg: Color
-    ) {
+    fn draw_background(&mut self, x:f32,y:f32, w:f32,h:f32, bg: Color)
+    {
         self.begin_path();
         self.rect(x, y, w, h);
         self.fill_color(bg);
@@ -66,8 +72,8 @@ impl LowLevelDraw for Ctx {
 
     // Draw a beveled border at position (x, y) with size (w, h) shaded with
     // lighter and darker versions of backgroundColor
-    fn draw_bevel(&mut self, x:f32,y:f32, w:f32,h:f32, bg: Color
-    ) {
+    fn draw_bevel(&mut self, x:f32,y:f32, w:f32,h:f32, bg: Color)
+    {
         self.stroke_width(1.0);
 
         let x = x + 0.5;
@@ -328,8 +334,8 @@ impl LowLevelDraw for Ctx {
 
     // Draw a checkmark for an option box with the given upper left coordinates
     // (ox, oy) with the specified color.
-    fn draw_check(&mut self, ox: f32, oy: f32, color: Color
-    ) {
+    fn draw_check(&mut self, ox: f32, oy: f32, color: Color)
+    {
         self.begin_path();
         self.stroke_width(2.0);
         self.stroke_color(color);
@@ -344,8 +350,8 @@ impl LowLevelDraw for Ctx {
 
     // Draw a horizontal arrow for a number field with its center at (x, y) and
     // size s; if s is negative, the arrow points to the left.
-    fn draw_arrow(&mut self, x: f32, y: f32, s: f32, color: Color
-    ) {
+    fn draw_arrow(&mut self, x: f32, y: f32, s: f32, color: Color)
+    {
         self.begin_path();
         self.move_to(x, y);
         self.line_to(x-s, y+s);
@@ -356,8 +362,8 @@ impl LowLevelDraw for Ctx {
     }
 
     // Draw an up/down arrow for a choice box with its center at (x, y) and size s
-    fn draw_up_down_arrow(&mut self, x: f32, y: f32, s: f32, color: Color
-    ) {
+    fn draw_up_down_arrow(&mut self, x: f32, y: f32, s: f32, color: Color)
+    {
         self.begin_path();
         let w = 1.1*s;
         self.move_to(x, y-1.0);
