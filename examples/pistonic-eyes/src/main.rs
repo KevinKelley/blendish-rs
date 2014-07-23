@@ -38,7 +38,7 @@ impl<'a> App<'a> {
             demodata: None,
             mouse: (0,0),
             elapsed_time: 0.0,         // time sinze app start
-            theme: ThemedContext::new(
+            theme: ThemedContext::wrap(
                 Ctx::create_gL3(ANTIALIAS|STENCIL_STROKES))
         }
     }

@@ -13,7 +13,7 @@ path = "src/main.rs"
 
 [dependencies.blendish]
 path = "../.."
-git = "https://github.com/KevinKelley/blendish-rs"
+#git = "https://github.com/KevinKelley/blendish-rs"
 
 [dependencies.nanovg]
 #path = "../../../nanovg-rs"
