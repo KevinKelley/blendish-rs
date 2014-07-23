@@ -1,4 +1,5 @@
 #![feature(globs)]
+#![allow(unused_imports)]
 
 extern crate nanovg;
 extern crate blendish;
@@ -16,16 +17,18 @@ use piston::{
     MousePressArgs, MouseReleaseArgs,
     MouseScrollArgs, MouseMoveArgs, MouseRelativeMoveArgs,
 };
-use nanovg::{Ctx, ANTIALIAS,STENCIL_STROKES, };
+use nanovg::{Ctx, ANTIALIAS,STENCIL_STROKES, Font,Image };
 use blendish::*;
 use blendish::lowlevel_draw::LowLevelDraw;
 use blendish::themed_draw::ThemedDraw;
+use resources::DemoData;
 
 mod draw;
+mod resources;
 
 ///////////////////////////////////////////////////////////////////////
 // shorthand fns
-fn rgb(r:u8, g:u8, b:u8) -> Color { Color::rgb(r,g,b) }
+//fn rgb(r:u8, g:u8, b:u8) -> Color { Color::rgb(r,g,b) }
 fn rgba(r:u8, g:u8, b:u8, a:u8) -> Color { Color::rgba(r,g,b, a) }
 // just testing
 fn draw_bg(vg: &mut Ctx, x:f32,y:f32,w:f32,h:f32) {
@@ -39,7 +42,7 @@ fn draw_bg(vg: &mut Ctx, x:f32,y:f32,w:f32,h:f32) {
 
 
 pub struct App<'a> {
-    demodata: Option<bool>,//demo::DemoData>,
+    //resources: DemoData,
     mouse: (i32,i32),           // current mouse pos
     elapsed_time: f64,          // seconds since app start
     themed: ThemedContext<'a>    // warp nvg ctx w/ themed-draw fns
@@ -47,12 +50,15 @@ pub struct App<'a> {
 
 impl<'a> App<'a> {
     pub fn new() -> App<'a> {
+        let nvg = Ctx::create_gl3(ANTIALIAS|STENCIL_STROKES);
+        let resources = DemoData::load(&nvg, "../../res");
+        let font = resources.fontNormal;
+        let icons = resources.iconsheet;    // move resources into the ThemedContext
         App {
-            demodata: None,
+            //resources: resources,
             mouse: (0,0),
             elapsed_time: 0.0,         // time since app start
-            themed: ThemedContext::wrap(
-                Ctx::create_gL3(ANTIALIAS|STENCIL_STROKES))
+            themed: ThemedContext::wrap(nvg, icons, font)
         }
     }
     fn nvg(&mut self) -> &mut Ctx { self.themed.nvg() }
@@ -63,13 +69,13 @@ impl<'a> App<'a> {
 impl<'a> Game for App<'a>
 {
     fn load(&mut self) {
-        self.demodata = Some(true); //demo::DemoData::load(self.nvg(), "../../res"));
     }
 
     fn update(&mut self, args: &UpdateArgs) {
         self.elapsed_time += args.dt;
     }
 
+    #[allow(unused_variable)]
     fn render(&mut self, args: &RenderArgs) {
         //let (mx, my) = window.get_cursor_pos();
         //let (winWidth, winHeight) = window.get_size();
@@ -82,17 +88,31 @@ impl<'a> Game for App<'a>
         let t       = self.elapsed_time as f32;
         let dt      = args.ext_dt as f32;
         let (mx,my) = self.mouse;
-        let _data   = self.demodata.expect("data not loaded!?");
         let bg      = self.theme().backgroundColor;
+
+//        let data = match self.resources.as_ref() { //.expect("data not loaded!?");
+//            Some(data) => {
+//                (
+//                    data.fontNormal,
+//                    data.fontBold,
+//                    data.fontIcons,
+//                    data.images
+//                )
+//            },
+//            None => { (-1,-1,-1, [-1, ..12]) }
+//        };
 
         self.nvg().begin_frame(w as i32, h as i32, pxRatio);
 
-        draw_bg(self.nvg(), 0.0,0.0, w,h);
-        draw::draw(&mut self.themed, w,h, t);
-        //self.themed.draw_tooltip_background(0.0, 0.0, w,h);
-        //self.themed.draw_label(0.0, 0.0, 200.0, 32.0,  -1, "Here's lookin at ya!");
-
-        //self.nvg().draw_background(0.0, 0.0, w,h, rgb(242,142,242));
+//        match data {
+//            (_,_,icons,_) => {
+                draw_bg(self.nvg(), 0.0,0.0, w,h);
+                draw::draw(&mut self.themed, w,h, t);
+//            }
+            //_ => {
+            //    println!("no resources!");
+            //}
+//        }
 
         self.nvg().end_frame();
     }

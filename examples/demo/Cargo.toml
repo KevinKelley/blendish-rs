@@ -16,8 +16,8 @@ path = "../.."
 #git = "https://github.com/KevinKelley/blendish-rs"
 
 [dependencies.nanovg]
-path = "../../../nanovg-rs"
-#git = "https://github.com/KevinKelley/nanovg-rs"
+#path = "../../../nanovg-rs"
+git = "https://github.com/KevinKelley/nanovg-rs"
 
 
 [dependencies.glfw]

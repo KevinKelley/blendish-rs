@@ -1,6 +1,6 @@
 
 
-use nanovg::{Color, Ctx};
+use nanovg::{Ctx, Color, Font, Image};
 
 
 /// describes the theme used to draw a single widget or widget box;
@@ -11,7 +11,7 @@ pub struct WidgetTheme
 {
     /// color of widget box outline
     pub outlineColor: Color,
-    /// color of widget item (meaning changes depending on class)
+    /// color of widget item (meaning changes depending on widget class)
     pub itemColor: Color,
     /// fill color of widget box
     pub innerColor: Color,
@@ -33,6 +33,7 @@ pub struct Theme
 {
     /// the background color of panels and windows
     pub backgroundColor: Color,
+
     /// theme for labels
     pub regularTheme: WidgetTheme,
     /// theme for tool buttons
@@ -63,9 +64,10 @@ pub struct Theme
 
 pub trait Themed<'a> {
     fn theme(&'a self) -> &'a Theme;
-    fn icon_images_handle(&'a self) -> i32;
-    fn font_handle(&'a self) -> i32;
+    fn icon_images_handle(&'a self) -> &Image;
+    fn font_handle(&'a self) -> &Font;
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 /// extends a nanovg context with theming
 
@@ -73,54 +75,47 @@ pub struct ThemedContext<'a>
 {
     theme: Theme,
 
+    // nanovg rendering context (owned)
     nvg: Ctx,
 
-    icon_image: i32, // handle, icon image spritesheet
-    font: i32,       // handle
+    // handle, icon image spritesheet
+    icon_image: Image,
+
+    // handle
+    font: Font,
+
 }
 
 impl<'a> ThemedContext<'a> {
-    pub fn wrap(nvg: Ctx) -> ThemedContext<'a> {
+    pub fn wrap(nvg: Ctx, icon_sheet: Image, font: Font) -> ThemedContext<'a> {
         ThemedContext {
             nvg: nvg,
             theme: initial_theme(),
-            icon_image: -1,
-            font: -1
+            icon_image: icon_sheet,
+            font: font
         }
     }
 
     pub fn nvg(&mut self) -> &mut Ctx { &mut self.nvg }
 
     pub fn theme(&self) -> &Theme { &self.theme }
+
+    pub fn font(&self) -> &Font { &self.font }
+
+    pub fn icon_image(&self) -> &Image { &self.icon_image }
+
+    pub fn set_theme(&mut self, theme: Theme) { self.theme = theme }
+
+    pub fn set_icon_image(&mut self, icons: Image) { self.icon_image = icons }
+
+    pub fn set_font(&mut self, font: Font) { self.font = font }
 }
 
 impl<'a> Themed<'a> for ThemedContext<'a> {
     fn theme(&'a self) -> &'a Theme { self.theme() }
-    fn icon_images_handle(&self) -> i32 { self.icon_image }
-    fn font_handle(&self) -> i32 { self.font }
+    fn icon_images_handle(&self) -> &Image { self.icon_image() }
+    fn font_handle(&self) -> &Font { self.font() }
 }
-
-//pub fn bndSetTheme(theme: Theme) {
-//    bnd_theme = theme;
-//}
-//
-//pub fn bndGetTheme<'a>() -> &'a Theme {
-//    return &bnd_theme;
-//}
-//
-//// the handle to the image containing the icon sheet
-//static bnd_icon_image: c_int = -1;
-//
-//pub fn bndSetIconImage(image: c_int) {
-//    bnd_icon_image = image;
-//}
-//
-//// the handle to the UI font
-//static bnd_font: c_int = -1;
-//
-//pub fn bndSetFont(font: c_int) {
-//    bnd_font = font;
-//}
 
 
 ////////////////////////////////////////////////////////////////////////////////

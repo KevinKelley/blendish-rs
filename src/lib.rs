@@ -15,6 +15,7 @@ extern crate nanovg;
 pub use nanovg::Color;
 pub use nanovg::Winding;
 pub use CCW = nanovg::CCW;
+pub use nanovg::{Image, Font};
 pub use constants::*;
 pub use theme::ThemedContext;
 pub use theme::*;
@@ -93,14 +94,14 @@ bitflags!(
 // Use these functions to estimate sizes for widgets with your NVGcontext.
 
 // returns the ideal width for a label with given icon and text
-pub fn label_width(ctx: &nanovg::Ctx, iconid: i32, label: &str, bnd_font: i32
+pub fn label_width(ctx: &nanovg::Ctx, iconid: i32, label: &str, font: Font
 ) -> f32 {
     let mut w = (PAD_LEFT + PAD_RIGHT) as f32;
     if iconid >= 0 {
         w += ICON_SHEET_RES as f32;
     }
-    if label.len() > 0  && (bnd_font >= 0) {
-        ctx.font_face_id( bnd_font);
+    if label.len() > 0 {
+        ctx.font_face_id( font);
         ctx.font_size(LABEL_FONT_SIZE);
         w += ctx.text_advance(1.0, 1.0, label);
     }
