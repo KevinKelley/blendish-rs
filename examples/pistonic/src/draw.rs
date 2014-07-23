@@ -1,7 +1,7 @@
 
 use blendish::*;
-use blendish::constants::*;
 //use blendish::ThemedContext;
+use blendish::constants::*;
 use blendish::themed_draw::ThemedDraw;
 use blendish::lowlevel_draw::LowLevelDraw;
 
@@ -13,17 +13,15 @@ fn fmodf(numer: f32, denom: f32) -> f32 {
 	numer - tquot * denom
 }
 
-fn get_time() -> f32 { 0.0 }
 fn icon_id(x:u8, y:u8) -> i32 { ICONID(x,y) as i32 }
 
 
-pub fn draw(ctx: &mut ThemedContext, w:f32, h:f32, bg: Color)
+pub fn draw(ctx: &mut ThemedContext, w:f32, h:f32, t: f32)
 {
 	let wgtheight:f32 = WIDGET_HEIGHT as f32;
 	let toolwidth:f32 = TOOL_WIDTH	  as f32;
-	let empty_str = "";
-	let empty = empty_str.as_slice();
 
+	let bg = ctx.theme().backgroundColor;
     ctx.nvg().draw_background(0.0, 0.0, w, h, bg);
 
     let mut x = 10.0;
@@ -125,7 +123,7 @@ pub fn draw(ctx: &mut ThemedContext, w:f32, h:f32, bg: Color)
 
     x = ox;
     y += 40.0;
-    let progress_value:f32 = fmodf(get_time()/10.0, 1.0);
+    let progress_value:f32 = fmodf(t/10.0, 1.0);
     let progress_label = format!("{}%", (progress_value*100.0+0.5) as int);
 
     ctx.draw_slider(x,y, 240.0, wgtheight,CORNER_NONE,DEFAULT,
@@ -138,8 +136,8 @@ pub fn draw(ctx: &mut ThemedContext, w:f32, h:f32, bg: Color)
         progress_value, "Active", progress_label.as_slice());
 
     let rw:f32 = x+240.0-rx;
-    let s_offset:f32 = sin(get_time()/2.0)*0.5+0.5;
-    let s_size  :f32 = cos(get_time()/3.11)*0.5+0.5;
+    let s_offset:f32 = sin(t/2.0)*0.5+0.5;
+    let s_size  :f32 = cos(t/3.11)*0.5+0.5;
 
     let scrollbar_h = SCROLLBAR_HEIGHT as f32;
     ctx.draw_scrollbar(rx, ry, rw, scrollbar_h,DEFAULT, s_offset, s_size);
@@ -150,7 +148,7 @@ pub fn draw(ctx: &mut ThemedContext, w:f32, h:f32, bg: Color)
 
     let edit_text = "The quick brown fox".to_string();
     let textlen =edit_text.len() as i32;
-    let t = (get_time()*2.0) as i32;
+    let t = (t*2.0) as i32;
     let idx1 = ((t/textlen)%textlen) as i32;
     let idx2 = (idx1 + (t%(textlen-idx1))) as i32;
 
@@ -177,38 +175,38 @@ pub fn draw(ctx: &mut ThemedContext, w:f32, h:f32, bg: Color)
     x = ox;
     y += 40.0;
     ctx.draw_tool_button(x,y, toolwidth, wgtheight,CORNER_RIGHT,
-        DEFAULT, icon_id(0, 10), empty);
+        DEFAULT, icon_id(0, 10), "".as_slice());
     x += toolwidth - 1.0;
     ctx.draw_tool_button(x,y, toolwidth, wgtheight,CORNER_ALL,
-        DEFAULT, icon_id(1, 10), empty);
+        DEFAULT, icon_id(1, 10), "".as_slice());
     x += toolwidth - 1.0;
     ctx.draw_tool_button(x,y, toolwidth, wgtheight,CORNER_ALL,
-        DEFAULT, icon_id(2, 10), empty);
+        DEFAULT, icon_id(2, 10), "".as_slice());
     x += toolwidth - 1.0;
     ctx.draw_tool_button(x,y, toolwidth, wgtheight,CORNER_ALL,
-        DEFAULT, icon_id(3, 10), empty);
+        DEFAULT, icon_id(3, 10), "".as_slice());
     x += toolwidth - 1.0;
     ctx.draw_tool_button(x,y, toolwidth, wgtheight,CORNER_ALL,
-        DEFAULT, icon_id(4, 10), empty);
+        DEFAULT, icon_id(4, 10), "".as_slice());
     x += toolwidth - 1.0;
     ctx.draw_tool_button(x,y, toolwidth, wgtheight,CORNER_LEFT,
-        DEFAULT, icon_id(5, 10), empty);
+        DEFAULT, icon_id(5, 10), "".as_slice());
     x += toolwidth - 1.0;
     x += 5.0;
     ctx.draw_radio_button(x,y, toolwidth, wgtheight,CORNER_RIGHT,
-        DEFAULT, icon_id(0, 11), empty);
+        DEFAULT, icon_id(0, 11), "".as_slice());
     x += toolwidth - 1.0;
     ctx.draw_radio_button(x,y, toolwidth, wgtheight,CORNER_ALL,
-        DEFAULT, icon_id(1, 11), empty);
+        DEFAULT, icon_id(1, 11), "".as_slice());
     x += toolwidth - 1.0;
     ctx.draw_radio_button(x,y, toolwidth, wgtheight,CORNER_ALL,
-        DEFAULT, icon_id(2, 11), empty);
+        DEFAULT, icon_id(2, 11), "".as_slice());
     x += toolwidth - 1.0;
     ctx.draw_radio_button(x,y, toolwidth, wgtheight,CORNER_ALL,
-        DEFAULT, icon_id(3, 11), empty);
+        DEFAULT, icon_id(3, 11), "".as_slice());
     x += toolwidth - 1.0;
     ctx.draw_radio_button(x,y, toolwidth, wgtheight,CORNER_ALL,
-        ACTIVE, icon_id(4, 11), empty);
+        ACTIVE, icon_id(4, 11), "".as_slice());
     x += toolwidth - 1.0;
     ctx.draw_radio_button(x,y, toolwidth, wgtheight,CORNER_LEFT,
         DEFAULT, icon_id(5, 11), "".as_slice());
