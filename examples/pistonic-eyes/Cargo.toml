@@ -12,11 +12,11 @@ path = "src/main.rs"
 
 
 [dependencies.blendish]
-path = "../.."
-#git = "https://github.com/KevinKelley/blendish-rs"
+#path = "../.."
+git = "https://github.com/KevinKelley/blendish-rs"
 
 [dependencies.nanovg]
-#path = "../../../../nanovg-rs"
+#path = "../../../nanovg-rs"
 git = "https://github.com/KevinKelley/nanovg-rs"
 
 
@@ -28,14 +28,12 @@ git = "https://github.com/bjz/gl-rs"
 
 
 [dependencies.piston]
-# path = "../piston"
 git = "https://github.com/PistonDevelopers/piston"
 
 [dependencies.graphics]
 git = "https://github.com/pistondevelopers/rust-graphics"
 
 [dependencies.glfw_game_window]
-# path = "../glfw_game_window"
 git = "https://github.com/PistonDevelopers/glfw_game_window"
 
 
