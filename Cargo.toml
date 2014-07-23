@@ -6,9 +6,8 @@ authors = ["Kevin Kelley <kevin@kelleysoft.com>"]
 
 
 [dependencies.nanovg]
-
-path = "../../nanovg-rs"
-#git = "https://github.com/KevinKelley/nanovg-rs"
+#path = "../nanovg-rs"
+git = "https://github.com/KevinKelley/nanovg-rs"
 
 
 [dependencies.glfw]
