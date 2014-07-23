@@ -21,7 +21,7 @@ use nanovg::{Ctx, ANTIALIAS,STENCIL_STROKES, Font,Image };
 use blendish::*;
 use blendish::lowlevel_draw::LowLevelDraw;
 use blendish::themed_draw::ThemedDraw;
-use resources::DemoData;
+use resources::Resources;
 
 mod draw;
 mod resources;
@@ -42,7 +42,7 @@ fn draw_bg(vg: &mut Ctx, x:f32,y:f32,w:f32,h:f32) {
 
 
 pub struct App<'a> {
-    //resources: DemoData,
+    //resources: Resources,
     mouse: (i32,i32),           // current mouse pos
     elapsed_time: f64,          // seconds since app start
     themed: ThemedContext<'a>    // warp nvg ctx w/ themed-draw fns
@@ -51,7 +51,7 @@ pub struct App<'a> {
 impl<'a> App<'a> {
     pub fn new() -> App<'a> {
         let nvg = Ctx::create_gl3(ANTIALIAS|STENCIL_STROKES);
-        let resources = DemoData::load(&nvg, "../../res");
+        let resources = Resources::load(&nvg, "../../res");
         let font = resources.fontNormal;
         let icons = resources.iconsheet;    // move resources into the ThemedContext
         App {

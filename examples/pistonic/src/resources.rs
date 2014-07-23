@@ -13,15 +13,15 @@ static ICON_LOGIN:         char = '\uE740';
 static ICON_TRASH:         char = '\uE729';
 
 
-pub struct DemoData {
+pub struct Resources {
 	//vg: &Ctx,
 	pub fontNormal: Font,
 	pub iconsheet: Image
 }
 
 /// load and hold resources used in demo
-impl DemoData {
-	pub fn load(vg: &Ctx, res_path: &str) -> DemoData
+impl Resources {
+	pub fn load(vg: &Ctx, res_path: &str) -> Resources
 	{
 		let filename = format!("{}/blender_icons16.png", res_path);
 		let icons = vg.create_image(filename.as_slice())
@@ -34,7 +34,7 @@ impl DemoData {
 		//let fontIcons = vg.create_font("icons", format!("{}/entypo.ttf", res_path).as_slice())
 		//	.expect("Could not add font 'icons'.");
 
-		DemoData {
+		Resources {
 			fontNormal: font,
 			iconsheet:  icons
 		}
