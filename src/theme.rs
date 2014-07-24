@@ -1,5 +1,5 @@
-
-
+use std::rc::Rc;
+use std::gc::GC;
 use nanovg::{Ctx, Color, Font, Image};
 
 
@@ -64,8 +64,8 @@ pub struct Theme
 
 pub trait Themed<'a> {
     fn theme(&'a self) -> &'a Theme;
-    fn icon_images_handle(&'a self) -> &Image;
-    fn font_handle(&'a self) -> &Font;
+    fn icon_images_handle(&'a self) -> Rc<Image>;
+    fn font_handle(&'a self) -> Rc<Font>;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,10 +79,10 @@ pub struct ThemedContext<'a>
     nvg: Ctx,
 
     // handle, icon image spritesheet
-    icon_image: Image,
+    icon_image: Rc<Image>,
 
     // handle
-    font: Font,
+    font: Rc<Font>,
 
 }
 
@@ -91,8 +91,8 @@ impl<'a> ThemedContext<'a> {
         ThemedContext {
             nvg: nvg,
             theme: initial_theme(),
-            icon_image: icon_sheet,
-            font: font
+            icon_image: Rc::new(icon_sheet),
+            font: Rc::new(font)
         }
     }
 
@@ -100,21 +100,28 @@ impl<'a> ThemedContext<'a> {
 
     pub fn theme(&self) -> &Theme { &self.theme }
 
-    pub fn font(&self) -> &Font { &self.font }
+    /// give out refcounted clones -- when all have expired, and ours too,
+    /// the resource will be 'drop'ed.
+    pub fn font(&self) -> Rc<Font> { self.font.clone() }
 
-    pub fn icon_image(&self) -> &Image { &self.icon_image }
+    /// give out refcounted clones to client code
+    pub fn icon_image(&self) -> Rc<Image> { self.icon_image.clone() }
+
 
     pub fn set_theme(&mut self, theme: Theme) { self.theme = theme }
-
-    pub fn set_icon_image(&mut self, icons: Image) { self.icon_image = icons }
-
-    pub fn set_font(&mut self, font: Font) { self.font = font }
+    /// take ownership, wrap in ref-counted box.
+    pub fn set_icon_image(&mut self, icons: Image) { self.icon_image = Rc::new(icons) }
+    /// take ownership, wrap in ref-counted box.
+    pub fn set_font(&mut self, font: Font) { self.font = Rc::new(font) }
 }
 
-impl<'a> Themed<'a> for ThemedContext<'a> {
+impl<'a> Themed<'a> for ThemedContext<'a>
+{
     fn theme(&'a self) -> &'a Theme { self.theme() }
-    fn icon_images_handle(&self) -> &Image { self.icon_image() }
-    fn font_handle(&self) -> &Font { self.font() }
+
+    fn icon_images_handle<'b>(&self) -> Rc<Image> { self.icon_image() }
+
+    fn font_handle<'c>(&self) -> Rc<Font> { self.font() }
 }
 
 

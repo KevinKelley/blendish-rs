@@ -21,6 +21,7 @@ pub use theme::ThemedContext;
 pub use theme::*;
 
 pub use ICONID = ffi::BND_ICONID;
+pub use TextAlignment = nanovg::Align;
 
 mod ffi;
 pub mod constants;
@@ -39,13 +40,22 @@ pub fn rgba_f(r:f32, g:f32, b:f32, a:f32) -> Color { Color::rgba_f(r, g, b, a) }
 pub fn black() -> Color { Color::rgba(0,0,0,1) }
 
 
+// pub fn label_width(ctx: &nanovg::Ctx, iconid: i32, label: &str, font: &Font) -> f32
+// pub fn transparent(color: Color) -> Color
+// pub fn offset_color(color: Color, delta: i32) -> Color
+// pub fn select_corners(radiuses: &mut [f32, ..4], r: f32, flags: CornerFlags)
+// pub fn inner_colors(shade_top: &mut Color, shade_down: &mut Color, theme: &WidgetTheme, state: WidgetState, flipActive: bool
+// pub fn text_color(theme: &WidgetTheme, state: WidgetState) -> Color
+// pub fn scroll_handle_rect(x: &mut f32, y: &mut f32, w: &mut f32, h: &mut f32, offset: f32, size: f32
+
 
 /// how text on a control is aligned
-#[repr(u32)]
-pub enum TextAlignment {
-    LEFT   = ffi::BND_LEFT,
-    CENTER = ffi::BND_CENTER
-}
+//#[repr(u32)]
+//pub enum TextAlignment
+//{
+//    LEFT   = ffi::BND_LEFT,
+//    CENTER = ffi::BND_CENTER
+//}
 
 #[repr(u32)]
 #[deriving(Clone, Eq, Hash, PartialEq, Show)]
@@ -94,8 +104,8 @@ bitflags!(
 // Use these functions to estimate sizes for widgets with your NVGcontext.
 
 // returns the ideal width for a label with given icon and text
-pub fn label_width(ctx: &nanovg::Ctx, iconid: i32, label: &str, font: Font
-) -> f32 {
+pub fn label_width(ctx: &nanovg::Ctx, iconid: i32, label: &str, font: &Font) -> f32
+{
     let mut w = (PAD_LEFT + PAD_RIGHT) as f32;
     if iconid >= 0 {
         w += ICON_SHEET_RES as f32;
@@ -144,8 +154,8 @@ pub fn offset_color(color: Color, delta: i32) -> Color
 // assigns radius r to the four entries of array radiuses depending on whether
 // the corner is marked as sharp or not; see BNDcornerFlags for possible
 // flag values.
-pub fn select_corners(radiuses: &mut [f32, ..4], r: f32, flags: CornerFlags
-) {
+pub fn select_corners(radiuses: &mut [f32, ..4], r: f32, flags: CornerFlags)
+{
     radiuses[0] = if flags.contains(CORNER_TOP_LEFT  ) {0.0} else {r};
     radiuses[1] = if flags.contains(CORNER_TOP_RIGHT ) {0.0} else {r};
     radiuses[2] = if flags.contains(CORNER_DOWN_RIGHT) {0.0} else {r};
@@ -156,8 +166,8 @@ pub fn select_corners(radiuses: &mut [f32, ..4], r: f32, flags: CornerFlags
 // theme and the widgets state. If flipActive is set and the state is
 // ACTIVE, the upper and lower colors will be swapped.
 pub fn inner_colors(shade_top: &mut Color, shade_down: &mut Color,
-    theme: &WidgetTheme, state: WidgetState, flipActive: bool
-) {
+    theme: &WidgetTheme, state: WidgetState, flipActive: bool)
+{
     match state {
 	    //default:
 	    DEFAULT => {

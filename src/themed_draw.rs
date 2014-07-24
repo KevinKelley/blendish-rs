@@ -1,5 +1,5 @@
 
-use nanovg::Color;
+use nanovg::{Color, LEFT,CENTER,RIGHT, TOP,MIDDLE,BOTTOM, BASELINE};
 use super::constants::*;
 use super::*;
 use super::lowlevel_draw::LowLevelDraw;
@@ -7,24 +7,23 @@ use super::lowlevel_draw::LowLevelDraw;
 
 pub trait ThemedDraw
 {
-    fn draw_label(&mut self, x:f32,y:f32, w:f32,h:f32, iconid: i32, label: &str);
-    fn draw_tool_button(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: i32, label: &str);
-    fn draw_radio_button(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: i32, label: &str);
-    fn draw_text_field(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: i32, text: &str, cbegin: i32, cend: i32);
+    fn draw_label(&mut self, x:f32,y:f32, w:f32,h:f32, iconid: u32, label: &str);
+    fn draw_tool_button(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: u32, label: &str);
+    fn draw_radio_button(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: u32, label: &str);
+    fn draw_text_field(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: u32, text: &str, cbegin: i32, cend: i32);
     fn draw_option_button(&mut self, x:f32,y:f32, w:f32,h:f32, state: WidgetState, label: &str);
-    fn draw_choice_button(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: i32, label: &str);
+    fn draw_choice_button(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: u32, label: &str);
     fn draw_number_field(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, label: &str, value: &str);
     fn draw_slider(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, progress: f32, label: &str, value: &str);
     fn draw_scrollbar(&mut self, x:f32,y:f32, w:f32,h:f32, state: WidgetState, offset: f32, size: f32);
     fn draw_menu_background(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags);
-    fn draw_menu_label(&mut self, x:f32,y:f32, w:f32,h:f32, iconid: i32, label: &str);
-    fn draw_menu_item(&mut self, x:f32,y:f32, w:f32,h:f32, state: &mut WidgetState, iconid: i32, label: &str);
+    fn draw_menu_label(&mut self, x:f32,y:f32, w:f32,h:f32, iconid: u32, label: &str);
+    fn draw_menu_item(&mut self, x:f32,y:f32, w:f32,h:f32, state: &mut WidgetState, iconid: u32, label: &str);
     fn draw_tooltip_background(&mut self, x:f32,y:f32, w:f32,h:f32);
 }
 
 impl<'a> ThemedDraw for ThemedContext<'a>
 {
-
     ////////////////////////////////////////////////////////////////////////////////
     // High Level Functions
     // --------------------
@@ -35,12 +34,14 @@ impl<'a> ThemedDraw for ThemedContext<'a>
     // if label is not NULL, a label will be added to the widget
     // widget looks best when height is WIDGET_HEIGHT
     fn draw_label(&mut self,
-        x:f32,y:f32, w:f32,h:f32, iconid: i32, label: &str
+        x:f32,y:f32, w:f32,h:f32, iconid: u32, label: &str
     ) {
         let color = self.theme().regularTheme.textColor;
+        let icons = *self.icon_image();
+        let font  = *self.font();
         self.nvg().draw_icon_label_value(x, y, w, h, iconid,
             color, LEFT,
-            LABEL_FONT_SIZE, label, None);
+            &font, LABEL_FONT_SIZE, &icons, label, None);
     }
 
     // Draw a tool button  with its lower left origin at (x, y) and size of (w, h),
@@ -51,7 +52,7 @@ impl<'a> ThemedDraw for ThemedContext<'a>
     // widget looks best when height is WIDGET_HEIGHT
     fn draw_tool_button(&mut self,
         x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState,
-        iconid: i32, label: &str
+        iconid: u32, label: &str
     ) {
         let mut cr: [f32, ..4] = [0.0, ..4]; //float cr[4];
         let mut shade_top: Color = black();
@@ -66,9 +67,11 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         self.nvg().draw_outline_box(x, y, w, h, cr[0], cr[1], cr[2], cr[3],
             transparent(color));
         let color = text_color(&self.theme().toolTheme, state);
+        let icons = *self.icon_image();
+        let font  = *self.font();
         self.nvg().draw_icon_label_value(x, y, w, h, iconid,
             color, CENTER,
-            LABEL_FONT_SIZE, label, None);
+            &font, LABEL_FONT_SIZE, &icons, label, None);
     }
 
     // Draw a radio button with its lower left origin at (x, y) and size of (w, h),
@@ -79,7 +82,7 @@ impl<'a> ThemedDraw for ThemedContext<'a>
     // widget looks best when height is WIDGET_HEIGHT
     fn draw_radio_button(&mut self,
         x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState,
-        iconid: i32, label: &str
+        iconid: u32, label: &str
     ) {
         let mut cr: [f32, ..4] = [0.0, ..4]; //float cr[4];
         let mut shade_top: Color = black();
@@ -94,9 +97,11 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         self.nvg().draw_outline_box(x, y, w, h, cr[0], cr[1], cr[2], cr[3],
             transparent(outline));
         let color = text_color(&self.theme().radioTheme, state);
+        let icons = *self.icon_image();
+        let font  = *self.font();
         self.nvg().draw_icon_label_value(x, y, w, h, iconid,
             color, CENTER,
-            LABEL_FONT_SIZE, label, None);
+            &font, LABEL_FONT_SIZE, &icons, label, None);
     }
 
     // Draw a text field with its lower left origin at (x, y) and size of (w, h),
@@ -110,7 +115,7 @@ impl<'a> ThemedDraw for ThemedContext<'a>
     // widget looks best when height is WIDGET_HEIGHT
     fn draw_text_field(&mut self,
         x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState,
-        iconid: i32, text: &str, cbegin: i32, cend: i32
+        iconid: u32, text: &str, cbegin: i32, cend: i32
     ) {
         let mut cr: [f32, ..4] = [0.0, ..4]; //float cr[4];
         let mut shade_top: Color = black();
@@ -130,8 +135,12 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         }
         let itemcolor = self.theme().textFieldTheme.itemColor;
         let textcolor = text_color(&self.theme().textFieldTheme, state);
+        let icons = *self.icon_image();
+        let font  = *self.font();
         self.nvg().draw_icon_label_caret(x, y, w, h, iconid,
-            textcolor, LABEL_FONT_SIZE,
+            textcolor,
+            //font, LABEL_FONT_SIZE, icons,
+            LABEL_FONT_SIZE,
             text, itemcolor, cbegin, cend);
     }
 
@@ -170,9 +179,11 @@ impl<'a> ThemedDraw for ThemedContext<'a>
             self.nvg().draw_check(ox, oy, transparent(color));
         }
         let color = text_color(&self.theme().optionTheme, state);
+        let icons = *self.icon_image();
+        let font  = *self.font();
         self.nvg().draw_icon_label_value(x+12.0, y, w-12.0, h, -1,
             color, LEFT,
-            LABEL_FONT_SIZE, label, None);
+            &font, LABEL_FONT_SIZE, &icons, label, None);
     }
 
     // Draw a choice button with its lower left origin at (x, y) and size of (w, h),
@@ -183,7 +194,7 @@ impl<'a> ThemedDraw for ThemedContext<'a>
     // widget looks best when height is WIDGET_HEIGHT
     fn draw_choice_button(&mut self,
         x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState,
-        iconid: i32, label: &str
+        iconid: u32, label: &str
     ) {
         let mut cr: [f32, ..4] = [0.0, ..4]; //float cr[4];
         let mut shade_top: Color = black();
@@ -198,9 +209,11 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         self.nvg().draw_outline_box(x, y, w, h, cr[0], cr[1], cr[2], cr[3],
             transparent(color));
         let color = text_color(&self.theme().choiceTheme, state);
+        let icons = *self.icon_image();
+        let font  = *self.font();
         self.nvg().draw_icon_label_value(x, y, w, h, iconid,
             color, LEFT,
-            LABEL_FONT_SIZE, label, None);
+            &font, LABEL_FONT_SIZE, &icons, label, None);
         let color = self.theme().choiceTheme.itemColor;
         self.nvg().draw_up_down_arrow(x+w-10.0, y+10.0, 5.0,
             transparent(color));
@@ -230,8 +243,10 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         self.nvg().draw_outline_box(x, y, w, h, cr[0], cr[1], cr[2], cr[3],
             transparent(color));
         let color = text_color(&self.theme().numberFieldTheme, state);
+        let icons = *self.icon_image();
+        let font  = *self.font();
         self.nvg().draw_icon_label_value(x, y, w, h, -1,
-            color, CENTER, LABEL_FONT_SIZE, label, Some(value));
+            color, CENTER, &font, LABEL_FONT_SIZE, &icons, label, Some(value));
         let color = self.theme().numberFieldTheme.itemColor;
         self.nvg().draw_arrow(x+8.0, y+10.0, -NUMBER_ARROW_SIZE,
             transparent(color));
@@ -282,8 +297,10 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         self.nvg().draw_outline_box(x, y, w, h, cr[0], cr[1], cr[2], cr[3],
             transparent(outline));
         let color = text_color(&self.theme().sliderTheme, state);
+        let icons = *self.icon_image();
+        let font  = *self.font();
         self.nvg().draw_icon_label_value(x, y, w, h, -1,
-            color, CENTER, LABEL_FONT_SIZE, label, Some(value));
+            color, CENTER, &font, LABEL_FONT_SIZE, &icons, label, Some(value));
     }
 
     // Draw scrollbar with its lower left origin at (x, y) and size of (w, h),
@@ -362,12 +379,14 @@ impl<'a> ThemedDraw for ThemedContext<'a>
     // if label is not NULL, a label will be added to the widget
     // widget looks best when height is WIDGET_HEIGHT
     fn draw_menu_label(&mut self,
-        x:f32,y:f32, w:f32,h:f32, iconid: i32, label: &str
+        x:f32,y:f32, w:f32,h:f32, iconid: u32, label: &str
     ) {
         let color = self.theme().menuTheme.textColor;
+        let icons = *self.icon_image();
+        let font  = *self.font();
         self.nvg().draw_icon_label_value(x, y, w, h, iconid,
             color, LEFT,
-            LABEL_FONT_SIZE, label, None);
+            &font, LABEL_FONT_SIZE, &icons, label, None);
     }
 
     // Draw a menu item with its lower left origin at (x, y) and size of (w, h),
@@ -377,7 +396,7 @@ impl<'a> ThemedDraw for ThemedContext<'a>
     // widget looks best when height is WIDGET_HEIGHT
     fn draw_menu_item(&mut self,
         x:f32,y:f32, w:f32,h:f32, state: &mut WidgetState,
-        iconid: i32, label: &str
+        iconid: u32, label: &str
     ) {
         let top = self.theme().menuItemTheme.shadeTop;
         let down = self.theme().menuItemTheme.shadeDown;
@@ -389,8 +408,10 @@ impl<'a> ThemedDraw for ThemedContext<'a>
             *state = ACTIVE;
         }
         let color = text_color(&self.theme().menuItemTheme, *state);
+        let icons = *self.icon_image();
+        let font  = *self.font();
         self.nvg().draw_icon_label_value(x, y, w, h, iconid, color,
-            LEFT, LABEL_FONT_SIZE, label, None);
+            LEFT, &font, LABEL_FONT_SIZE, &icons, label, None);
     }
 
     // Draw a tooltip background with its lower left origin at (x, y) and size of (w, h)

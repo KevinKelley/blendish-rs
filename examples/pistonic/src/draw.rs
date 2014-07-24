@@ -13,7 +13,7 @@ fn fmodf(numer: f32, denom: f32) -> f32 {
 	numer - tquot * denom
 }
 
-fn icon_id(x:u8, y:u8) -> i32 { ICONID(x,y) as i32 }
+fn icon_id(x:u8, y:u8) -> u32 { ICONID(x,y) as u32 }
 
 
 pub fn draw(ctx: &mut ThemedContext, w:f32, h:f32, t: f32)

@@ -1,11 +1,16 @@
 
-use nanovg::{ Ctx, Color, BUTT,MITER };
+use nanovg::{
+    Ctx,
+    Color, Image,Font,
+    BUTT,MITER, NOREPEAT,
+    LEFT,CENTER,RIGHT,TOP,BOTTOM,BASELINE };
 use super::{
     TextAlignment,
     min,max,
     rgba_f,offset_color,transparent,
     BEVEL_SHADE,INSET_BEVEL_SHADE
 };
+use super::constants::*;
 
 
 //////////////////////////////////////////////////////
@@ -34,9 +39,24 @@ pub trait LowLevelDraw
     fn draw_check        (&mut self,ox:f32,oy:f32, color: Color);
     fn draw_arrow        (&mut self, x:f32, y:f32, s: f32, color: Color);
     fn draw_up_down_arrow(&mut self, x:f32, y:f32, s: f32, color: Color);
-    fn draw_icon         (&mut self, x:f32, y:f32, iconid: i32);
-    fn draw_icon_label_value(&mut self, x:f32,y:f32, w:f32,h:f32, iconid: i32, color: Color, align: TextAlignment, fontsize: f32, label: &str, value: Option<&str>);
-    fn draw_icon_label_caret(&mut self, x:f32,y:f32, w:f32,h:f32, iconid: i32, color: Color, fontsize: f32, label: &str, caretcolor: Color, cbegin: i32, cend: i32);
+    fn draw_icon         (&mut self, x:f32, y:f32, iconid: u32, icons: &Image);
+    fn draw_icon_label_value(&mut self,
+        x:f32,y:f32, w:f32,h:f32,
+        iconid: u32,
+        color: Color,
+        align: TextAlignment,
+        font: &Font,
+        fontsize: f32,
+        icons: &Image,
+        label: &str,
+        value: Option<&str>);
+    fn draw_icon_label_caret(&mut self,
+        x:f32,y:f32, w:f32,h:f32,
+        iconid: u32,
+        color: Color,
+        fontsize: f32,
+        label: &str,
+        caretcolor: Color, cbegin: i32, cend: i32);
 }
 impl LowLevelDraw for Ctx {
 
@@ -124,8 +144,8 @@ impl LowLevelDraw for Ctx {
             self.linear_gradient(
                 x, y+h-max(cr2, cr3)-1.0,
                 x, y+h-1.0,
-            rgba_f(bevelColor.r(), bevelColor.g(), bevelColor.b(), 0.0),
-            bevelColor));
+                rgba_f(bevelColor.r(), bevelColor.g(), bevelColor.b(), 0.0),
+                bevelColor));
         self.stroke();
     }
 
@@ -192,24 +212,26 @@ impl LowLevelDraw for Ctx {
 
     // Draw an icon with (x, y) as its upper left coordinate; the iconid selects
     // the icon from the sheet; use the ICONID macro to build icon IDs.
-    fn draw_icon(&mut self, x: f32, y: f32, iconid: i32
-    ) {
-    //    let icons = self.theme().icon_image;
-    //    if (icons < 0) {return}  // no icons loaded
-    //
-    //    let ix = iconid & 0xff;
-    //    let iy = (iconid>>8) & 0xff;
-    //    let u = (ICON_SHEET_OFFSET_X + ix*ICON_SHEET_GRID) as f32;
-    //    let v = (ICON_SHEET_OFFSET_Y + iy*ICON_SHEET_GRID) as f32;
-    //
-    //    self.begin_path();
-    //    self.rect(x, y, ICON_SHEET_RES, ICON_SHEET_RES);
-    //    self.fill_paint(
-    //        self.image_pattern(x-u, y-v,
-    //        ICON_SHEET_WIDTH as f32,
-    //        ICON_SHEET_HEIGHT as f32,
-    //        0.0, icons, 0.0, 1.0));
-    //    self.fill();
+    fn draw_icon(&mut self, x: f32, y: f32, iconid: u32, icons: &Image)
+    {
+        //let icons = self.theme().icon_image;
+        //if (icons < 0) {return}  // no icons loaded
+
+        let ix = iconid & 0xff;
+        let iy = (iconid>>8) & 0xff;
+        let u = (ICON_SHEET_OFFSET_X + ix*ICON_SHEET_GRID) as f32;
+        let v = (ICON_SHEET_OFFSET_Y + iy*ICON_SHEET_GRID) as f32;
+
+        let res = ICON_SHEET_RES as f32;
+        self.begin_path();
+        self.rect(x, y, res, res);
+        self.fill_paint(
+            self.image_pattern(x-u, y-v,
+                ICON_SHEET_WIDTH as f32,
+                ICON_SHEET_HEIGHT as f32,
+                0.0, icons, NOREPEAT, 1.0)
+        );
+        self.fill();
     }
 
     // Draw an optional icon specified by <iconid> and an optional label with
@@ -220,50 +242,67 @@ impl LowLevelDraw for Ctx {
     // and color.
     // if value is not NULL, label and value will be drawn with a ":" separator
     // inbetween.
-    fn draw_icon_label_value(&mut self, x:f32,y:f32, w:f32,h:f32,
-        iconid: i32, color: Color, align: TextAlignment, fontsize: f32, label: &str,
+    fn draw_icon_label_value(&mut self,
+        x:f32,y:f32, w:f32,h:f32,
+        iconid: u32,
+        color: Color,
+        align: TextAlignment,
+        font: &Font,
+        fontsize: f32,
+        icons: &Image,
+        label: &str,
         value: Option<&str>
     ) {
-    //    let pleft = PAD_LEFT;
-    //    if label {
-    //        if iconid >= 0 {
-    //            draw_icon(self, x+4.0, y+2.0, iconid);
-    //            pleft += ICON_SHEET_RES;
-    //        }
-    //
-    //        if bnd_font < 0 {return};
-    //        self.font_face_id(bnd_font);
-    //        self.font_size(fontsize);
-    //        self.begin_path();
-    //        self.fill_color(color);
-    //        if value {
-    //            let label_width = self.text_bounds(1.0, 1.0, label);
-    //            let sep_width = self.text_bounds(1.0, 1.0,
-    //                theme::LABEL_SEPARATOR);
-    //
-    //            self.text_align(nanovg::LEFT|nanovg::BASELINE);
-    //            x += pleft as f32;
-    //            if (align == CENTER) {
-    //                let width = label_width + sep_width
-    //                    + self.text_bounds(1.0, 1.0, value);
-    //                x += ((w-(PAD_RIGHT-pleft) as f32)-width)*0.5;
-    //            }
-    //            y += h-TEXT_PAD_DOWN as f32;
-    //            self.text(x, y, label);
-    //            x += label_width;
-    //            self.text(x, y, theme::LABEL_SEPARATOR);
-    //            x += sep_width;
-    //            self.text(x, y, value);
-    //        } else {
-    //            self.text_align(
-    //                if align==LEFT  {nanovg::LEFT  |nanovg::BASELINE}
-    //                else              {nanovg::CENTER|nanovg::BASELINE});
-    //            self.text_box(x+pleft as f32, y+h-TEXT_PAD_DOWN as f32,
-    //                w-PAD_RIGHT as f32-pleft as f32, label);
-    //        }
-    //    } else if (iconid >= 0) {
-    //        draw_icon(self, x+2.0, y+2.0, iconid);
-    //    }
+        let mut x = x;
+        let mut y = y;
+        let mut pleft = PAD_LEFT;
+        if label.len() > 0 {
+            if iconid >= 0 {
+                self.draw_icon(x+4.0, y+2.0, iconid, icons);
+                pleft += ICON_SHEET_RES;
+            }
+
+            //if bnd_font < 0 {return};
+            self.font_face_id(font);
+            self.font_size(fontsize);
+            self.begin_path();
+            self.fill_color(color);
+            match value {
+                Some(value) => {
+                    let label_width = self.text_advance(1.0, 1.0, label);
+                    let sep_width = self.text_advance(1.0, 1.0,
+                        LABEL_SEPARATOR);
+
+                    self.text_align(LEFT|BASELINE);
+                    x += pleft as f32;
+                    match align {
+                        CENTER => {
+                            let width = label_width + sep_width
+                                + self.text_advance(1.0, 1.0, value);
+                            x += ((w-(PAD_RIGHT-pleft) as f32)-width)*0.5;
+                        },
+                        _ => {}
+                    }
+                    y += h-TEXT_PAD_DOWN as f32;
+                    self.text(x, y, label);
+                    x += label_width;
+                    self.text(x, y, LABEL_SEPARATOR);
+                    x += sep_width;
+                    self.text(x, y, value);
+                },
+                None => {
+                    let align = match align {
+                        LEFT => LEFT|BASELINE,
+                        _  => CENTER|BASELINE
+                    };
+                    self.text_align(align);
+                    self.text_box(x+pleft as f32, y+h-TEXT_PAD_DOWN as f32,
+                        w-PAD_RIGHT as f32-pleft as f32, label);
+                }
+            }
+        } else if (iconid >= 0) {
+            self.draw_icon(x+2.0, y+2.0, iconid, icons);
+        }
     }
 
     // Draw an optional icon specified by <iconid>, an optional label and
@@ -276,14 +315,14 @@ impl LowLevelDraw for Ctx {
     // cend must be >= cbegin and <= strlen(text) and denotes the end of the caret
     // if cend < cbegin, then no caret will be drawn
     fn draw_icon_label_caret(&mut self, x:f32,y:f32, w:f32,h:f32,
-        iconid: i32, color: Color, fontsize: f32, label: &str,
+        iconid: u32, color: Color, fontsize: f32, label: &str,
         caretcolor: Color, cbegin: i32, cend: i32
     ) {
     //    let bounds: [f32, ..4];
     //    let pleft = theme::TEXT_RADIUS;
     //    if (!label) {return};
     //    if (iconid >= 0) {
-    //        draw_icon(self, x+4.0, y+2.0, iconid);
+    //        self.draw_icon(x+4.0, y+2.0, iconid);
     //        pleft += ICON_SHEET_RES as f32;
     //    }
     //
@@ -294,7 +333,7 @@ impl LowLevelDraw for Ctx {
     //
     //    self.font_face_id(bnd_font);
     //    self.font_size(fontsize);
-    //    self.text_align(nanovg::LEFT|nanovg::BASELINE);
+    //    self.text_align(LEFT|BASELINE);
     //
     //    if (cend >= cbegin) {
     //        //const char *cb;const char *ce;
@@ -318,7 +357,7 @@ impl LowLevelDraw for Ctx {
     //        self.text_bounds(x, y, label, bounds);
     //        self.begin_path();
     //        if (cbegin == cend) {
-    //            self.fill_color(nanovg::rgb_f(0.337, 0.502, 0.761));
+    //            self.fill_color(rgb_f(0.337, 0.502, 0.761));
     //            self.rect(c0-1.0, bounds[1], 2.0, bounds[3]-bounds[1]);
     //        } else {
     //            self.fill_color(caretcolor);
