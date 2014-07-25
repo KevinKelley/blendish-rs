@@ -300,7 +300,7 @@ impl LowLevelDraw for Ctx {
                         w-PAD_RIGHT as f32-pleft as f32, label);
                 }
             }
-        } else if (iconid >= 0) {
+        } else if iconid >= 0 {
             self.draw_icon(x+2.0, y+2.0, iconid, icons);
         }
     }

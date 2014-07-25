@@ -11,7 +11,7 @@ extern crate glfw_game_window;
 pub use Window = glfw_game_window::GameWindowGLFW;
 
 use piston::{
-    Game, GameIteratorSettings, GameWindowSettings,
+    Game, GameWindow, GameIteratorSettings, GameWindowSettings,
     UpdateArgs, RenderArgs,
     KeyPressArgs, KeyReleaseArgs,
     MousePressArgs, MouseReleaseArgs,
@@ -66,17 +66,17 @@ impl<'a> App<'a> {
     fn theme(&self) -> &Theme { self.themed.theme() }
 }
 
-impl<'a> Game for App<'a>
+impl<'a, W: GameWindow> Game<W> for App<'a>
 {
-    fn load(&mut self) {
+    fn load(&mut self, _window: &mut W) {
     }
 
-    fn update(&mut self, args: &UpdateArgs) {
+    fn update(&mut self, _window: &mut W, args: &UpdateArgs) {
         self.elapsed_time += args.dt;
     }
 
     #[allow(unused_variable)]
-    fn render(&mut self, args: &RenderArgs) {
+    fn render(&mut self, _window: &mut W, args: &RenderArgs) {
         //let (mx, my) = window.get_cursor_pos();
         //let (winWidth, winHeight) = window.get_size();
         //let (fbWidth, fbHeight) = window.get_framebuffer_size();
@@ -90,44 +90,25 @@ impl<'a> Game for App<'a>
         let (mx,my) = self.mouse;
         let bg      = self.theme().backgroundColor;
 
-//        let data = match self.resources.as_ref() { //.expect("data not loaded!?");
-//            Some(data) => {
-//                (
-//                    data.fontNormal,
-//                    data.fontBold,
-//                    data.fontIcons,
-//                    data.images
-//                )
-//            },
-//            None => { (-1,-1,-1, [-1, ..12]) }
-//        };
-
         self.nvg().begin_frame(w as i32, h as i32, pxRatio);
 
-//        match data {
-//            (_,_,icons,_) => {
-                draw_bg(self.nvg(), 0.0,0.0, w,h);
-                draw::draw(&mut self.themed, w,h, t);
-//            }
-            //_ => {
-            //    println!("no resources!");
-            //}
-//        }
+        draw_bg(self.nvg(), 0.0,0.0, w,h);
+        draw::draw(&mut self.themed, w,h, t);
 
         self.nvg().end_frame();
     }
 
-    fn key_press(&mut self,  _args: &KeyPressArgs) {}
-    fn key_release(&mut self, _args: &KeyReleaseArgs) {}
+    //fn key_press(&mut self, _window: &mut W,  _args: &KeyPressArgs) {}
+    //fn key_release(&mut self, _window: &mut W, _args: &KeyReleaseArgs) {}
 
-    fn mouse_press(&mut self, _args: &MousePressArgs) {}
-    fn mouse_release(&mut self, _args: &MouseReleaseArgs) {}
-    fn mouse_move(&mut self, args: &MouseMoveArgs) {
-        self.mouse = (args.x as i32, args.y as i32);
-    }
-    /// Moved mouse relative, not bounded by cursor.
-    fn mouse_relative_move(&mut self, _args: &MouseRelativeMoveArgs) {}
-    fn mouse_scroll(&mut self, _args: &MouseScrollArgs) {}
+    //fn mouse_press(&mut self, _window: &mut W, _args: &MousePressArgs) {}
+    //fn mouse_release(&mut self, _window: &mut W, _args: &MouseReleaseArgs) {}
+    //fn mouse_move(&mut self, _window: &mut W, args: &MouseMoveArgs) {
+    //    self.mouse = (args.x as i32, args.y as i32);
+    //}
+    ///// Moved mouse relative, not bounded by cursor.
+    //fn mouse_relative_move(&mut self, _window: &mut W, _args: &MouseRelativeMoveArgs) {}
+    //fn mouse_scroll(&mut self, _window: &mut W, _args: &MouseScrollArgs) {}
 }
 
 
