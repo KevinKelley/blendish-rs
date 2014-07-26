@@ -7,8 +7,8 @@ This is a port, and refactoring, of the single-header Blendish/OUI C code
 by duangle (link below).  I started by wrapping the static lib, but found I
 wanted to 'oxidize' it in the process.
 
-Work in progress.  I have some example code running, but not complete.
-Resources aren't loaded yet, for instance, but that will be soon.
+Work in progress.  Blendish port is done, and demo runs, there might be
+some glitches.  Needs some refactoring to be more appropriate for Rust.
 
 
 Blendish

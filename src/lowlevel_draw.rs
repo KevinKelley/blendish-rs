@@ -349,6 +349,7 @@ impl LowLevelDraw for Ctx {
                 else if cbegin >= label.len() { glyphs[nglyphs-1].maxx() }
                 else {
                     let mut c0_tmp = x;
+                    // TODO fix, maybe binary search inst. linear scan
                     for i in range(0u, nglyphs) {
                         if glyphs[i].byte_index() == cbegin { c0_tmp = glyphs[i].x(); }
                     }
@@ -358,6 +359,7 @@ impl LowLevelDraw for Ctx {
                 else if cend >= label.len() { glyphs[nglyphs-1].maxx() }
                 else {
                     let mut c1_tmp = x;
+                    // TODO fix, maybe binary search inst. linear scan
                     for i in range(0u, nglyphs) {
                         if glyphs[i].byte_index() == cend { c1_tmp = glyphs[i].x(); }
                     }
