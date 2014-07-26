@@ -10,7 +10,7 @@ pub trait ThemedDraw
     fn draw_label(&mut self, x:f32,y:f32, w:f32,h:f32, iconid: u32, label: &str);
     fn draw_tool_button(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: u32, label: &str);
     fn draw_radio_button(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: u32, label: &str);
-    fn draw_text_field(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: u32, text: &str, cbegin: i32, cend: i32);
+    fn draw_text_field(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: u32, text: &str, cbegin: uint, cend: uint);
     fn draw_option_button(&mut self, x:f32,y:f32, w:f32,h:f32, state: WidgetState, label: &str);
     fn draw_choice_button(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: u32, label: &str);
     fn draw_number_field(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, label: &str, value: &str);
@@ -115,7 +115,7 @@ impl<'a> ThemedDraw for ThemedContext<'a>
     // widget looks best when height is WIDGET_HEIGHT
     fn draw_text_field(&mut self,
         x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState,
-        iconid: u32, text: &str, cbegin: i32, cend: i32
+        iconid: u32, text: &str, cbegin: uint, cend: uint
     ) {
         let mut cr: [f32, ..4] = [0.0, ..4]; //float cr[4];
         let mut shade_top: Color = black();
@@ -137,11 +137,10 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         let textcolor = text_color(&self.theme().textFieldTheme, state);
         let icons = *self.icon_image();
         let font  = *self.font();
-        self.nvg().draw_icon_label_caret(x, y, w, h, iconid,
-            textcolor,
-            //font, LABEL_FONT_SIZE, icons,
-            LABEL_FONT_SIZE,
-            text, itemcolor, cbegin, cend);
+        self.nvg().draw_icon_label_caret(x, y, w, h,
+            &icons, iconid,
+            textcolor, &font, LABEL_FONT_SIZE, text,
+            itemcolor, cbegin, cend);
     }
 
     // Draw an option button with its lower left origin at (x, y) and size of (w, h),

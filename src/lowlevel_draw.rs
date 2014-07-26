@@ -1,7 +1,7 @@
 
 use nanovg::{
     Ctx,
-    Color, Image,Font,
+    Color, Image, Font, GlyphPosition,
     BUTT,MITER, NOREPEAT,
     LEFT,CENTER,RIGHT,TOP,BOTTOM,BASELINE };
 use super::{
@@ -39,7 +39,7 @@ pub trait LowLevelDraw
     fn draw_check        (&mut self,ox:f32,oy:f32, color: Color);
     fn draw_arrow        (&mut self, x:f32, y:f32, s: f32, color: Color);
     fn draw_up_down_arrow(&mut self, x:f32, y:f32, s: f32, color: Color);
-    fn draw_icon         (&mut self, x:f32, y:f32, iconid: u32, icons: &Image);
+    fn draw_icon         (&mut self, x:f32, y:f32, icons: &Image, iconid: u32);
     fn draw_icon_label_value(&mut self,
         x:f32,y:f32, w:f32,h:f32,
         iconid: u32,
@@ -52,11 +52,13 @@ pub trait LowLevelDraw
         value: Option<&str>);
     fn draw_icon_label_caret(&mut self,
         x:f32,y:f32, w:f32,h:f32,
+        icons: &Image,
         iconid: u32,
         color: Color,
+        font: &Font,
         fontsize: f32,
         label: &str,
-        caretcolor: Color, cbegin: i32, cend: i32);
+        caretcolor: Color, cbegin: uint, cend: uint);
 }
 impl LowLevelDraw for Ctx {
 
@@ -212,7 +214,7 @@ impl LowLevelDraw for Ctx {
 
     // Draw an icon with (x, y) as its upper left coordinate; the iconid selects
     // the icon from the sheet; use the ICONID macro to build icon IDs.
-    fn draw_icon(&mut self, x: f32, y: f32, iconid: u32, icons: &Image)
+    fn draw_icon(&mut self, x: f32, y: f32, icons: &Image, iconid: u32)
     {
         //let icons = self.theme().icon_image;
         //if (icons < 0) {return}  // no icons loaded
@@ -257,10 +259,11 @@ impl LowLevelDraw for Ctx {
         let mut y = y;
         let mut pleft = PAD_LEFT;
         if label.len() > 0 {
-            if iconid >= 0 {
-                self.draw_icon(x+4.0, y+2.0, iconid, icons);
+            //if iconid >= 0 {      // we don't have 'invalid iconid'; id is just
+                                    // a row,col indexer into some arbitrary image*/
+                self.draw_icon(x+4.0, y+2.0, icons, iconid);
                 pleft += ICON_SHEET_RES;
-            }
+            //}
 
             //if bnd_font < 0 {return};
             self.font_face_id(font);
@@ -300,8 +303,9 @@ impl LowLevelDraw for Ctx {
                         w-PAD_RIGHT as f32-pleft as f32, label);
                 }
             }
-        } else if iconid >= 0 {
-            self.draw_icon(x+2.0, y+2.0, iconid, icons);
+        } else {    // else if iconid >= 0      // we don't have 'invalid iconid'; id is just
+                                                // a row,col indexer into some arbitrary image*/
+            self.draw_icon(x+2.0, y+2.0, icons, iconid);
         }
     }
 
@@ -314,61 +318,65 @@ impl LowLevelDraw for Ctx {
     // cbegin must be >= 0 and <= strlen(text) and denotes the beginning of the caret
     // cend must be >= cbegin and <= strlen(text) and denotes the end of the caret
     // if cend < cbegin, then no caret will be drawn
-    fn draw_icon_label_caret(&mut self, x:f32,y:f32, w:f32,h:f32,
-        iconid: u32, color: Color, fontsize: f32, label: &str,
-        caretcolor: Color, cbegin: i32, cend: i32
+    fn draw_icon_label_caret(&mut self,
+        x:f32,y:f32, w:f32,h:f32,
+        icons: &Image,
+        iconid: u32,
+        color: Color,
+        font: &Font,
+        fontsize: f32,
+        label: &str,
+        caretcolor: Color, cbegin: uint, cend: uint
     ) {
-    //    let bounds: [f32, ..4];
-    //    let pleft = theme::TEXT_RADIUS;
-    //    if (!label) {return};
-    //    if (iconid >= 0) {
-    //        self.draw_icon(x+4.0, y+2.0, iconid);
-    //        pleft += ICON_SHEET_RES as f32;
-    //    }
-    //
-    //    if (bnd_font < 0) {return};
-    //
-    //    x+=pleft;
-    //    y+=h-TEXT_PAD_DOWN as f32;
-    //
-    //    self.font_face_id(bnd_font);
-    //    self.font_size(fontsize);
-    //    self.text_align(LEFT|BASELINE);
-    //
-    //    if (cend >= cbegin) {
-    //        //const char *cb;const char *ce;
-    //        let /*static*/ glyphs: [NVGglyphPosition, ..theme::MAX_GLYPHS];
-    //        let nglyphs = self.text_glyph_positions(
-    //            x, y, label, label+cend+1, glyphs, theme::MAX_GLYPHS);
-    //        let c0=glyphs[0].x;
-    //        let c1=glyphs[nglyphs-1].x;
-    //        let cb = label+cbegin;
-    //        let ce = label+cend;
-    //        // TODO: this is slow
-    //        for i in range(0, nglyphs) {
-    //            if (glyphs[i].str == cb) {
-    //                c0 = glyphs[i].x;
-    //            }
-    //            if (glyphs[i].str == ce) {
-    //                c1 = glyphs[i].x;
-    //            }
-    //        }
-    //
-    //        self.text_bounds(x, y, label, bounds);
-    //        self.begin_path();
-    //        if (cbegin == cend) {
-    //            self.fill_color(rgb_f(0.337, 0.502, 0.761));
-    //            self.rect(c0-1.0, bounds[1], 2.0, bounds[3]-bounds[1]);
-    //        } else {
-    //            self.fill_color(caretcolor);
-    //            self.rect(c0-1.0, bounds[1], c1-c0+1.0, bounds[3]-bounds[1]);
-    //        }
-    //        self.fill();
-    //    }
-    //
-    //    self.begin_path();
-    //    self.fill_color(color);
-    //    self.text_box(x, y, w-theme::TEXT_RADIUS-pleft, label);
+        let mut bounds = [0.0, ..4];
+        let mut pleft = TEXT_RADIUS;
+        if label.len() == 0 {return};
+        //if (iconid >= 0) {
+            self.draw_icon(x+4.0, y+2.0, icons, iconid);
+            pleft += ICON_SHEET_RES as f32;
+        //}
+
+        let x = x + pleft;
+        let y = y + h-TEXT_PAD_DOWN as f32;
+
+        self.font_face_id(font);
+        self.font_size(fontsize);
+        self.text_align(LEFT|BASELINE);
+
+        if cend >= cbegin {
+            //const char *cb;const char *ce;
+            //let /*static*/ glyphs: [GlyphPosition, ..MAX_GLYPHS];
+            let glyphs = self.text_glyph_positions(x, y, label.slice(0, cend+1));//, label+cend+1);
+            let nglyphs = glyphs.len();
+            let mut c0=glyphs[0].x();
+            let mut c1=glyphs[nglyphs-1].x();
+            let cb = /*label+*/cbegin;
+            let ce = /*label+*/cend;
+            // TODO: this is slow
+            for i in range(0u, nglyphs) {
+                if (glyphs[i].byte_index() == cb) {
+                    c0 = glyphs[i].x();
+                }
+                if (glyphs[i].byte_index() == ce) {
+                    c1 = glyphs[i].x();
+                }
+            }
+
+            self.text_bounds(x, y, label, &mut bounds);
+            self.begin_path();
+            if (cbegin == cend) {
+                self.fill_color(Color::rgb_f(0.337, 0.502, 0.761));
+                self.rect(c0-1.0, bounds[1], 2.0, bounds[3]-bounds[1]);
+            } else {
+                self.fill_color(caretcolor);
+                self.rect(c0-1.0, bounds[1], c1-c0+1.0, bounds[3]-bounds[1]);
+            }
+            self.fill();
+        }
+
+        self.begin_path();
+        self.fill_color(color);
+        self.text_box(x, y, w-TEXT_RADIUS-pleft, label);
     }
 
     // Draw a checkmark for an option box with the given upper left coordinates

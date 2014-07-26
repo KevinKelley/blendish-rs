@@ -7,10 +7,8 @@
 #![allow(unused_variable)]
 #![allow(dead_code)]
 
-
 extern crate libc;
 extern crate nanovg;
-
 
 pub use nanovg::Color;
 pub use nanovg::Winding;
