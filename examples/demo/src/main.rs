@@ -25,7 +25,6 @@ use piston::{
     MouseScrollArgs,
 };
 
-
 use blendish::*;
 use blendish::WidgetState;
 //use blendish::theme::ThemedContext;

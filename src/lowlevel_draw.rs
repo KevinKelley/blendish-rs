@@ -328,13 +328,11 @@ impl LowLevelDraw for Ctx {
         label: &str,
         caretcolor: Color, cbegin: uint, cend: uint
     ) {
-        let mut bounds = [0.0, ..4];
         let mut pleft = TEXT_RADIUS;
         if label.len() == 0 {return};
         //if (iconid >= 0) {
             self.draw_icon(x+4.0, y+2.0, icons, iconid);
             pleft += ICON_SHEET_RES as f32;
-        //}
 
         let x = x + pleft;
         let y = y + h-TEXT_PAD_DOWN as f32;
@@ -344,36 +342,43 @@ impl LowLevelDraw for Ctx {
         self.text_align(LEFT|BASELINE);
 
         if cend >= cbegin {
-            //const char *cb;const char *ce;
-            //let /*static*/ glyphs: [GlyphPosition, ..MAX_GLYPHS];
-            let glyphs = self.text_glyph_positions(x, y, label.slice(0, cend+1));//, label+cend+1);
+            // find glyphs where caret start/end
+            let glyphs = self.text_glyph_positions(x, y, label);
             let nglyphs = glyphs.len();
-            let mut c0=glyphs[0].x();
-            let mut c1=glyphs[nglyphs-1].x();
-            let cb = /*label+*/cbegin;
-            let ce = /*label+*/cend;
-            // TODO: this is slow
-            for i in range(0u, nglyphs) {
-                if (glyphs[i].byte_index() == cb) {
-                    c0 = glyphs[i].x();
-                }
-                if (glyphs[i].byte_index() == ce) {
-                    c1 = glyphs[i].x();
-                }
-            }
-
+            let c0 = if nglyphs == 0 { x }
+                else if cbegin >= label.len() { glyphs[nglyphs-1].maxx() }
+                else {
+                    let mut c0_tmp = x;
+                    for i in range(0u, nglyphs) {
+                        if glyphs[i].byte_index() == cbegin { c0_tmp = glyphs[i].x(); }
+                    }
+                    c0_tmp
+                };
+            let c1 = if nglyphs == 0 { x }
+                else if cend >= label.len() { glyphs[nglyphs-1].maxx() }
+                else {
+                    let mut c1_tmp = x;
+                    for i in range(0u, nglyphs) {
+                        if glyphs[i].byte_index() == cend { c1_tmp = glyphs[i].x(); }
+                    }
+                    c1_tmp
+                };
+            // draw caret (or selection-hilite)
+            let mut bounds = [0.0, ..4];
             self.text_bounds(x, y, label, &mut bounds);
             self.begin_path();
-            if (cbegin == cend) {
+            if cbegin == cend {
+                // no selection, thin caret
                 self.fill_color(Color::rgb_f(0.337, 0.502, 0.761));
                 self.rect(c0-1.0, bounds[1], 2.0, bounds[3]-bounds[1]);
             } else {
+                // hilite the selected text
                 self.fill_color(caretcolor);
                 self.rect(c0-1.0, bounds[1], c1-c0+1.0, bounds[3]-bounds[1]);
             }
             self.fill();
         }
-
+        // finally draw the text
         self.begin_path();
         self.fill_color(color);
         self.text_box(x, y, w-TEXT_RADIUS-pleft, label);

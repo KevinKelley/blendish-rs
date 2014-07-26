@@ -147,10 +147,10 @@ pub fn draw(ctx: &mut ThemedContext, w:f32, h:f32, t: f32)
     ctx.draw_scrollbar(rx, ry, rw, scrollbar_h,ACTIVE, s_offset, s_size);
 
     let edit_text = "The quick brown fox".to_string();
-    let textlen =edit_text.len() as i32;
-    let t = (t*2.0) as i32;
-    let idx1 = ((t/textlen)%textlen) as i32;
-    let idx2 = (idx1 + (t%(textlen-idx1))) as i32;
+    let textlen =edit_text.len();
+    let t = (t*2.0) as uint;
+    let idx1 = ((t/textlen)%textlen);
+    let idx2 = (idx1 + (t%(textlen-idx1)));
 
     ry += 25.0;
     let text = edit_text.as_slice();
