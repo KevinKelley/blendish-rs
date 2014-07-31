@@ -219,6 +219,8 @@ impl LowLevelDraw for Ctx {
         //let icons = self.theme().icon_image;
         //if (icons < 0) {return}  // no icons loaded
 
+        if iconid == -1 as u32 { return; }
+
         let ix = iconid & 0xff;
         let iy = (iconid>>8) & 0xff;
         let u = (ICON_SHEET_OFFSET_X + ix*ICON_SHEET_GRID) as f32;
@@ -259,11 +261,11 @@ impl LowLevelDraw for Ctx {
         let mut y = y;
         let mut pleft = PAD_LEFT;
         if label.len() > 0 {
-            //if iconid >= 0 {      // we don't have 'invalid iconid'; id is just
-                                    // a row,col indexer into some arbitrary image*/
+            if iconid != -1 as u32 {  // we don't have 'invalid iconid'; id is just
+                                      // a row,col indexer into some arbitrary image
                 self.draw_icon(x+4.0, y+2.0, icons, iconid);
                 pleft += ICON_SHEET_RES;
-            //}
+            }
 
             //if bnd_font < 0 {return};
             self.font_face_id(font);
@@ -303,7 +305,7 @@ impl LowLevelDraw for Ctx {
                         w-PAD_RIGHT as f32-pleft as f32, label);
                 }
             }
-        } else {    // else if iconid >= 0      // we don't have 'invalid iconid'; id is just
+        } else if iconid != -1 as u32 {         // we don't have 'invalid iconid'; id is just
                                                 // a row,col indexer into some arbitrary image*/
             self.draw_icon(x+2.0, y+2.0, icons, iconid);
         }
@@ -330,10 +332,10 @@ impl LowLevelDraw for Ctx {
     ) {
         let mut pleft = TEXT_RADIUS;
         if label.len() == 0 {return};
-        //if (iconid >= 0) {
+        if iconid != -1 as u32 {
             self.draw_icon(x+4.0, y+2.0, icons, iconid);
             pleft += ICON_SHEET_RES as f32;
-
+        }
         let x = x + pleft;
         let y = y + h-TEXT_PAD_DOWN as f32;
 

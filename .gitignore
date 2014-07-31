@@ -1,2 +1,3 @@
 target/
-*(copy*
+*(copy*penduli/
+examples/penduli/
