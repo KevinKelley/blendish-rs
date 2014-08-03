@@ -1,27 +1,22 @@
 #![crate_type = "lib"]
 
 #![feature(globs)]
-#![allow(non_snake_case_functions)]
+#![allow(non_snake_case_functions)]  // themes need converting
 //#![warn(missing_doc)]
-#![allow(unused_imports)]
-#![allow(unused_variable)]
-#![allow(dead_code)]
 
 extern crate libc;
 extern crate nanovg;
 
 pub use nanovg::Color;
 pub use nanovg::Winding;
-pub use CCW = nanovg::CCW;
+pub use nanovg::CCW;
 pub use nanovg::{Image, Font};
 pub use constants::*;
 pub use theme::ThemedContext;
 pub use theme::*;
 
-pub use ICONID = ffi::BND_ICONID;
 pub use TextAlignment = nanovg::Align;
 
-mod ffi;
 pub mod constants;
 pub mod theme;
 
@@ -29,14 +24,65 @@ pub mod lowlevel_draw;
 pub mod themed_draw;
 
 
+// build an icon ID from two coordinates into the icon sheet, where
+// (0,0) designates the upper-leftmost icon, (1,0) the one right next to it,
+// and so on.
+pub fn ICONID(x: u8, y: u8) -> u16 { x as u16 | (y as u16 << 8) }
+
 
 pub fn min(a:f32, b:f32) -> f32 { if a<b { a } else { b } }
 pub fn max(a:f32, b:f32) -> f32 { if a>b { a } else { b } }
-pub fn clamp(v: f32, mn: f32, mx: f32) -> f32 { max(mn, min(mx, v) ) } //if v>mx {mx} else { if v<mn {mn} else {v} }
+pub fn clamp(v: f32, mn: f32, mx: f32) -> f32 { max(mn, min(mx, v) ) }
 
 pub fn rgba_f(r:f32, g:f32, b:f32, a:f32) -> Color { Color::rgba_f(r, g, b, a) }
 pub fn black() -> Color { Color::rgba(0,0,0,1) }
 
+
+#[deriving(Clone, Eq, PartialEq, Show)]
+#[repr(u32)]
+pub enum WidgetState {
+    /// not interacting
+    DEFAULT  = 0,
+    /// the mouse is hovering over the control
+    HOVER    = 1,
+    /// the widget is activated (pressed) or in an active state (toggled)
+    ACTIVE   = 2,
+}
+
+/// flags indicating which corners are sharp (for grouping widgets)
+bitflags!(
+    flags CornerFlags: u32 {
+        // all corners are round
+        static CORNER_NONE         = 0,
+        // sharp top left corner
+        static CORNER_TOP_LEFT     = 1,
+        // sharp top right corner
+        static CORNER_TOP_RIGHT    = 2,
+        // sharp bottom right corner
+        static CORNER_DOWN_RIGHT   = 4,
+        // sharp bottom left corner
+        static CORNER_DOWN_LEFT    = 8,
+        // all corners are sharp;
+        // you can invert a set of flags using ^= BND_CORNER_ALL
+        static CORNER_ALL          = 0xF,
+        // top border is sharp
+        static CORNER_TOP          = 3,
+        // bottom border is sharp
+        static CORNER_DOWN         = 0xC,
+        // left border is sharp
+        static CORNER_LEFT         = 9,
+        // right border is sharp
+        static CORNER_RIGHT        = 6
+    }
+)
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+// Estimator Functions
+// -------------------
+// Use these functions to estimate sizes for widgets with your NVGcontext.
 
 // pub fn label_width(ctx: &nanovg::Ctx, iconid: i32, label: &str, font: &Font) -> f32
 // pub fn transparent(color: Color) -> Color
@@ -47,59 +93,6 @@ pub fn black() -> Color { Color::rgba(0,0,0,1) }
 // pub fn scroll_handle_rect(x: &mut f32, y: &mut f32, w: &mut f32, h: &mut f32, offset: f32, size: f32
 
 
-/// how text on a control is aligned
-//#[repr(u32)]
-//pub enum TextAlignment
-//{
-//    LEFT   = ffi::BND_LEFT,
-//    CENTER = ffi::BND_CENTER
-//}
-
-#[repr(u32)]
-#[deriving(Clone, Eq, Hash, PartialEq, Show)]
-pub enum WidgetState {
-    /// not interacting
-    DEFAULT  = ffi::BND_DEFAULT,
-    /// the mouse is hovering over the control
-    HOVER    = ffi::BND_HOVER,
-    /// the widget is activated (pressed) or in an active state (toggled)
-    ACTIVE   = ffi::BND_ACTIVE,
-}
-
-
-/// flags indicating which corners are sharp (for grouping widgets)
-bitflags!(
-    flags CornerFlags: u32 {
-        // all corners are round
-        static CORNER_NONE         = ffi::BND_CORNER_NONE,
-        // sharp top left corner
-        static CORNER_TOP_LEFT     = ffi::BND_CORNER_TOP_LEFT,
-        // sharp top right corner
-        static CORNER_TOP_RIGHT    = ffi::BND_CORNER_TOP_RIGHT,
-        // sharp bottom right corner
-        static CORNER_DOWN_RIGHT   = ffi::BND_CORNER_DOWN_RIGHT,
-        // sharp bottom left corner
-        static CORNER_DOWN_LEFT    = ffi::BND_CORNER_DOWN_LEFT,
-        // all corners are sharp;
-        // you can invert a set of flags using ^= BND_CORNER_ALL
-        static CORNER_ALL          = ffi::BND_CORNER_ALL,
-        // top border is sharp
-        static CORNER_TOP          = ffi::BND_CORNER_TOP,
-        // bottom border is sharp
-        static CORNER_DOWN         = ffi::BND_CORNER_DOWN,
-        // left border is sharp
-        static CORNER_LEFT         = ffi::BND_CORNER_LEFT,
-        // right border is sharp
-        static CORNER_RIGHT        = ffi::BND_CORNER_RIGHT
-    }
-)
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-// Estimator Functions
-// -------------------
-// Use these functions to estimate sizes for widgets with your NVGcontext.
 
 // returns the ideal width for a label with given icon and text
 pub fn label_width(ctx: &nanovg::Ctx, iconid: i32, label: &str, font: &Font) -> f32

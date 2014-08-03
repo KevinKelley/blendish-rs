@@ -1,5 +1,5 @@
 
-use nanovg::{Color, LEFT,CENTER,RIGHT, TOP,MIDDLE,BOTTOM, BASELINE};
+use nanovg::{Color, LEFT,CENTER };
 use super::constants::*;
 use super::*;
 use super::lowlevel_draw::LowLevelDraw;
@@ -7,6 +7,8 @@ use super::lowlevel_draw::LowLevelDraw;
 
 pub trait ThemedDraw
 {
+    fn draw_background(&mut self, x:f32,y:f32, w:f32,h:f32);
+    fn draw_bevel(&mut self, x:f32,y:f32, w:f32,h:f32);
     fn draw_label(&mut self, x:f32,y:f32, w:f32,h:f32, iconid: u32, label: &str);
     fn draw_tool_button(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: u32, label: &str);
     fn draw_radio_button(&mut self, x:f32,y:f32, w:f32,h:f32, flags: CornerFlags, state: WidgetState, iconid: u32, label: &str);
@@ -29,6 +31,22 @@ impl<'a> ThemedDraw for ThemedContext<'a>
     // --------------------
     // Use these functions to draw themed widgets with your NVGcontext.
 
+    // Draw a flat panel without any decorations at position (x, y) with size (w, h)
+    // and fills it with theme's backgroundColor
+    fn draw_background(&mut self, x:f32,y:f32, w:f32,h:f32)
+    {
+        let bg = self.theme().backgroundColor;
+        self.nvg().draw_background(x,y, w,h, bg);
+    }
+
+    // Draw a beveled border at position (x, y) with size (w, h) shaded with
+    // lighter and darker versions of backgroundColor
+    fn draw_bevel(&mut self, x:f32,y:f32, w:f32,h:f32)
+    {
+        let bg = self.theme().backgroundColor;
+        self.nvg().draw_bevel(x,y, w,h, bg);
+    }
+
     // Draw a label with its lower left origin at (x, y) and size of (w, h).
     // if iconid >= 0, an icon will be added to the widget
     // if label is not NULL, a label will be added to the widget
@@ -39,9 +57,9 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         let color = self.theme().regularTheme.textColor;
         let icons = *self.icon_image();
         let font  = *self.font();
-        self.nvg().draw_icon_label_value(x, y, w, h, iconid,
+        self.nvg().draw_icon_label_value(x, y, w, h, &icons, iconid,
             color, LEFT,
-            &font, LABEL_FONT_SIZE, &icons, label, None);
+            &font, LABEL_FONT_SIZE, label, None);
     }
 
     // Draw a tool button  with its lower left origin at (x, y) and size of (w, h),
@@ -69,9 +87,9 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         let color = text_color(&self.theme().toolTheme, state);
         let icons = *self.icon_image();
         let font  = *self.font();
-        self.nvg().draw_icon_label_value(x, y, w, h, iconid,
+        self.nvg().draw_icon_label_value(x, y, w, h, &icons, iconid,
             color, CENTER,
-            &font, LABEL_FONT_SIZE, &icons, label, None);
+            &font, LABEL_FONT_SIZE, label, None);
     }
 
     // Draw a radio button with its lower left origin at (x, y) and size of (w, h),
@@ -99,9 +117,9 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         let color = text_color(&self.theme().radioTheme, state);
         let icons = *self.icon_image();
         let font  = *self.font();
-        self.nvg().draw_icon_label_value(x, y, w, h, iconid,
+        self.nvg().draw_icon_label_value(x, y, w, h, &icons, iconid,
             color, CENTER,
-            &font, LABEL_FONT_SIZE, &icons, label, None);
+            &font, LABEL_FONT_SIZE, label, None);
     }
 
     // Draw a text field with its lower left origin at (x, y) and size of (w, h),
@@ -180,9 +198,9 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         let color = text_color(&self.theme().optionTheme, state);
         let icons = *self.icon_image();
         let font  = *self.font();
-        self.nvg().draw_icon_label_value(x+12.0, y, w-12.0, h, -1,
+        self.nvg().draw_icon_label_value(x+12.0, y, w-12.0, h, &icons, -1,
             color, LEFT,
-            &font, LABEL_FONT_SIZE, &icons, label, None);
+            &font, LABEL_FONT_SIZE, label, None);
     }
 
     // Draw a choice button with its lower left origin at (x, y) and size of (w, h),
@@ -210,9 +228,9 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         let color = text_color(&self.theme().choiceTheme, state);
         let icons = *self.icon_image();
         let font  = *self.font();
-        self.nvg().draw_icon_label_value(x, y, w, h, iconid,
+        self.nvg().draw_icon_label_value(x, y, w, h, &icons, iconid,
             color, LEFT,
-            &font, LABEL_FONT_SIZE, &icons, label, None);
+            &font, LABEL_FONT_SIZE, label, None);
         let color = self.theme().choiceTheme.itemColor;
         self.nvg().draw_up_down_arrow(x+w-10.0, y+10.0, 5.0,
             transparent(color));
@@ -244,8 +262,8 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         let color = text_color(&self.theme().numberFieldTheme, state);
         let icons = *self.icon_image();
         let font  = *self.font();
-        self.nvg().draw_icon_label_value(x, y, w, h, -1,
-            color, CENTER, &font, LABEL_FONT_SIZE, &icons, label, Some(value));
+        self.nvg().draw_icon_label_value(x, y, w, h, &icons, -1,
+            color, CENTER, &font, LABEL_FONT_SIZE, label, Some(value));
         let color = self.theme().numberFieldTheme.itemColor;
         self.nvg().draw_arrow(x+8.0, y+10.0, -NUMBER_ARROW_SIZE,
             transparent(color));
@@ -298,8 +316,8 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         let color = text_color(&self.theme().sliderTheme, state);
         let icons = *self.icon_image();
         let font  = *self.font();
-        self.nvg().draw_icon_label_value(x, y, w, h, -1,
-            color, CENTER, &font, LABEL_FONT_SIZE, &icons, label, Some(value));
+        self.nvg().draw_icon_label_value(x, y, w, h, &icons, -1,
+            color, CENTER, &font, LABEL_FONT_SIZE, label, Some(value));
     }
 
     // Draw scrollbar with its lower left origin at (x, y) and size of (w, h),
@@ -383,9 +401,9 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         let color = self.theme().menuTheme.textColor;
         let icons = *self.icon_image();
         let font  = *self.font();
-        self.nvg().draw_icon_label_value(x, y, w, h, iconid,
+        self.nvg().draw_icon_label_value(x, y, w, h, &icons, iconid,
             color, LEFT,
-            &font, LABEL_FONT_SIZE, &icons, label, None);
+            &font, LABEL_FONT_SIZE, label, None);
     }
 
     // Draw a menu item with its lower left origin at (x, y) and size of (w, h),
@@ -409,8 +427,8 @@ impl<'a> ThemedDraw for ThemedContext<'a>
         let color = text_color(&self.theme().menuItemTheme, *state);
         let icons = *self.icon_image();
         let font  = *self.font();
-        self.nvg().draw_icon_label_value(x, y, w, h, iconid, color,
-            LEFT, &font, LABEL_FONT_SIZE, &icons, label, None);
+        self.nvg().draw_icon_label_value(x, y, w, h, &icons, iconid,
+            color, LEFT, &font, LABEL_FONT_SIZE, label, None);
     }
 
     // Draw a tooltip background with its lower left origin at (x, y) and size of (w, h)

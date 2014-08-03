@@ -1,5 +1,4 @@
 use std::rc::Rc;
-use std::gc::GC;
 use nanovg::{Ctx, Color, Font, Image};
 
 
@@ -21,9 +20,9 @@ pub struct WidgetTheme
     pub textColor: Color,
     /// color of text label when active
     pub textSelectedColor: Color,
-    /// delta modifier for upper part of gradient (-100 to 100)
+    /// percentage-delta modifier for upper part of gradient (-100 to 100)
     pub shadeTop: i32,
-    /// delta modifier for lower part of gradient (-100 to 100)
+    /// percentage-delta modifier for lower part of gradient (-100 to 100)
     pub shadeDown: i32,
 }
 
@@ -130,8 +129,7 @@ impl<'a> Themed<'a> for ThemedContext<'a>
 fn rgba_f(r:f32, g:f32, b:f32, a:f32) -> Color { Color::rgba_f(r, g, b, a) }
 
 
-// the initial theme
-//pub static bnd_theme: Theme =
+// the initial theme mimics Blender
 pub fn initial_theme() -> Theme {
     // default text color
     let text_color_normal: Color = rgba_f( 0.0, 0.0, 0.0, 1.0);

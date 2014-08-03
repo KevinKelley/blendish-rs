@@ -1,14 +1,14 @@
 
 use nanovg::{
     Ctx,
-    Color, Image, Font, GlyphPosition,
+    Color, Image, Font,
     BUTT,MITER, NOREPEAT,
-    LEFT,CENTER,RIGHT,TOP,BOTTOM,BASELINE };
+    LEFT,CENTER,BASELINE
+};
 use super::{
     TextAlignment,
     min,max,
     rgba_f,offset_color,transparent,
-    BEVEL_SHADE,INSET_BEVEL_SHADE
 };
 use super::constants::*;
 
@@ -42,12 +42,12 @@ pub trait LowLevelDraw
     fn draw_icon         (&mut self, x:f32, y:f32, icons: &Image, iconid: u32);
     fn draw_icon_label_value(&mut self,
         x:f32,y:f32, w:f32,h:f32,
+        icons: &Image,
         iconid: u32,
         color: Color,
         align: TextAlignment,
         font: &Font,
         fontsize: f32,
-        icons: &Image,
         label: &str,
         value: Option<&str>);
     fn draw_icon_label_caret(&mut self,
@@ -83,7 +83,7 @@ impl LowLevelDraw for Ctx {
     }
 
     // Draw a flat panel without any decorations at position (x, y) with size (w, h)
-    // and fills it with backgroundColor
+    // and fills it with bg color
     fn draw_background(&mut self, x:f32,y:f32, w:f32,h:f32, bg: Color)
     {
         self.begin_path();
@@ -248,12 +248,12 @@ impl LowLevelDraw for Ctx {
     // inbetween.
     fn draw_icon_label_value(&mut self,
         x:f32,y:f32, w:f32,h:f32,
+        icons: &Image,
         iconid: u32,
         color: Color,
         align: TextAlignment,
         font: &Font,
         fontsize: f32,
-        icons: &Image,
         label: &str,
         value: Option<&str>
     ) {
