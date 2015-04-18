@@ -6,13 +6,13 @@ authors = ["Kevin Kelley <kevin@kelleysoft.com>"]
 
 
 [dependencies.nanovg]
-path = "../nanovg-rs"
-#git = "https://github.com/KevinKelley/nanovg-rs"
+#path = "../nanovg-rs"
+git = "https://github.com/KevinKelley/nanovg-rs"
 
 
 [dependencies.glfw]
-path = "../glfw-rs"
-#git = "https://github.com/bjz/glfw-rs"
+#path = "../glfw-rs"
+git = "https://github.com/bjz/glfw-rs"
 
 [dependencies.gl]
 git = "https://github.com/bjz/gl-rs"
