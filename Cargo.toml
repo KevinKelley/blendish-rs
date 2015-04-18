@@ -18,7 +18,7 @@ path = "../glfw-rs"
 git = "https://github.com/bjz/gl-rs"
 
 
-[[lib]]
+[lib]
 
 name = "blendish"
 path = "src/lib.rs"
